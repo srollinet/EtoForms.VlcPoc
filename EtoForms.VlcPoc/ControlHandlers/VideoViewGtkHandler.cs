@@ -32,6 +32,9 @@ namespace EtoForms.VlcPoc.ControlHandlers
             /// <returns>The window's XID</returns>
             [DllImport("libgdk-x11-2.0.so.0", CallingConvention = CallingConvention.Cdecl)]
             internal static extern uint gdk_x11_drawable_get_xid(IntPtr gdkWindow);
+            
+            [DllImport("libgdk-3.so.0", CallingConvention = CallingConvention.Cdecl)]
+            internal static extern uint gdk_x11_window_get_xid(IntPtr gdkWindow);
 
             /// <summary>
             /// Gets the nsview's handle
@@ -44,7 +47,9 @@ namespace EtoForms.VlcPoc.ControlHandlers
         }
         
         private MediaPlayer _mediaPlayer;
-        
+
+        public event EventHandler Ready;
+
         public MediaPlayer MediaPlayer
         {
             get => _mediaPlayer;
@@ -69,7 +74,11 @@ namespace EtoForms.VlcPoc.ControlHandlers
         {
             Control = new DrawingArea();
             Control.SetBackground(Colors.Black);
-            Control.Realized += (sender, args) => Attach();
+            Control.Realized += (sender, args) =>
+            {
+                Attach();
+                Ready?.Invoke(this, new EventArgs());
+            };
         }
 
         private void Attach()
@@ -85,8 +94,7 @@ namespace EtoForms.VlcPoc.ControlHandlers
             }
             else if (PlatformHelper.IsLinux)
             {
-                GdkWindow.EnsureNative();
-                MediaPlayer.XWindow = Native.gdk_x11_drawable_get_xid(GdkWindow.Handle);
+                MediaPlayer.XWindow = Native.gdk_x11_window_get_xid(GdkWindow.Handle);
             }
             else if (PlatformHelper.IsMac)
             {

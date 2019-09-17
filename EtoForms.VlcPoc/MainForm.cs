@@ -20,12 +20,7 @@ namespace EtoForms.VlcPoc
             videoView.MediaPlayer = mp;
             
             var media = new Media(libVlc, "/home/sro/Downloads/jellyfish-3-mbps-hd-h264.mkv");
-
-            Task.Run(async () =>
-            {
-                await Task.Delay(1000); 
-                mp.Play(media);
-            });
+            videoView.Ready += (sender, args) => mp.Play(media);
         }
     }
 }
